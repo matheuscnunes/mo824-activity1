@@ -6,23 +6,20 @@ public class ManufacturingProblem {
         try {
             GRBEnv env = new GRBEnv("manufacturing-problem.log");
             GRBModel model = new GRBModel(env);
-            int J = 100;
+            int J = 1000;
             int F = getRandomNumber(J, 2 * J); // Factories number
             int L = getRandomNumber(5, 10); // Machines number
             int M = getRandomNumber(5, 10); // Raw materials number
             int P = getRandomNumber(5, 10); // Products number
+            System.out.println("Clients: " + J);
+            System.out.println("Factories: " + F);
+            System.out.println("Machines: " + L);
+            System.out.println("Raw materials: " + M);
+            System.out.println("Products: " + P);
 
             // Create variables and constraints
 
             // D(j,p)
-//            GRBVar[][] demandJP = new GRBVar[j][p];
-//            for (int a = 0; a < j; a++) {
-//                for (int b = 0; b < p; b++) {
-//                    int demand = getRandomNumber(10, 20);
-//                    demandJP[a][b] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "D[" + a + "][" + b + "]");
-//                    model.addConstr(demand, GRB.EQUAL, demandJP[a][b], "D[" + a + "][" + b + "]");
-//                }
-//            }
             int[][] demandJP = new int[J][P];
             for (int j = 0; j < J; j++) {
                 for (int p = 0; p < P; p++) {
@@ -32,16 +29,6 @@ public class ManufacturingProblem {
             }
 
             // r(m,p,l)
-//            GRBVar[][][] rawMaterialMPL = new GRBVar[m][p][l];
-//            for (int a = 0; a < m; a++) {
-//                for (int b = 0; b < p; b++) {
-//                    for (int c = 0; c < l; c++) {
-//                        int materialNeed = getRandomNumber(1, 5);
-//                        rawMaterialMPL[a][b][c] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "r[" + a + "][" + b + "][" + c + "]");
-//                        model.addConstr(materialNeed, GRB.EQUAL, rawMaterialMPL[a][b][c], "r[" + a + "][" + b + "][" + c + "]");
-//                    }
-//                }
-//            }
             int[][][] rawMaterialMPL = new int[M][P][L];
             for (int m = 0; m < M; m++) {
                 for (int p = 0; p < P; p++) {
@@ -53,14 +40,6 @@ public class ManufacturingProblem {
             }
 
             // R(m,f)
-//            GRBVar[][] rawMaterialAvailableMF = new GRBVar[m][f];
-//            for (int a = 0; a < m; a++) {
-//                for (int b = 0; b < f; b++) {
-//                    int available = getRandomNumber(800, 1000);
-//                    rawMaterialAvailableMF[a][b] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "R[" + a + "][" + b + "]");
-//                    model.addConstr(available, GRB.EQUAL, rawMaterialAvailableMF[a][b], "R[" + a + "][" + b + "]");
-//                }
-//            }
             int[][] rawMaterialAvailableMF = new int[M][F];
             for (int m = 0; m < M; m++) {
                 for (int f = 0; f < F; f++) {
@@ -70,33 +49,15 @@ public class ManufacturingProblem {
             }
 
             // C(l,f)
-//            GRBVar[][] capacityLF = new GRBVar[l][f];
-//            for (int a = 0; a < m; a++) {
-//                for (int b = 0; b < f; b++) {
-//                    int capacity = getRandomNumber(80, 100);
-//                    capacityLF[a][b] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "C[" + a + "][" + b + "]");
-//                    model.addConstr(capacity, GRB.EQUAL, capacityLF[a][b], "C[" + a + "][" + b + "]");
-//                }
-//            }
             int[][] capacityLF = new int[L][F];
-            for (int m = 0; m < L; m++) {
+            for (int l = 0; l < L; l++) {
                 for (int f = 0; f < F; f++) {
                     int capacity = getRandomNumber(80, 100);
-                    capacityLF[m][f] = capacity;
+                    capacityLF[l][f] = capacity;
                 }
             }
 
             // P(p,l,f)
-//            GRBVar[][][] manufacturingCostPLF = new GRBVar[p][l][f];
-//            for (int a = 0; a < m; a++) {
-//                for (int b = 0; b < p; b++) {
-//                    for (int c = 0; c < l; c++) {
-//                        int cost = getRandomNumber(10, 100);
-//                        manufacturingCostPLF[a][b][c] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "p[" + a + "][" + b + "][" + c + "]");
-//                        model.addConstr(cost, GRB.EQUAL, manufacturingCostPLF[a][b][c], "p[" + a + "][" + b + "][" + c + "]");
-//                    }
-//                }
-//            }
             int[][][] manufacturingCostPLF = new int[P][L][F];
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
@@ -108,16 +69,6 @@ public class ManufacturingProblem {
             }
 
             // t(p,f,j)
-//            GRBVar[][][] transportCostPFJ = new GRBVar[p][f][j];
-//            for (int a = 0; a < m; a++) {
-//                for (int b = 0; b < p; b++) {
-//                    for (int c = 0; c < l; c++) {
-//                        int cost = getRandomNumber(10, 20);
-//                        transportCostPFJ[a][b][c] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "t[" + a + "][" + b + "][" + c + "]");
-//                        model.addConstr(cost, GRB.EQUAL, transportCostPFJ[a][b][c], "t[" + a + "][" + b + "][" + c + "]");
-//                    }
-//                }
-//            }
             int[][][] transportCostPFJ = new int[P][F][J];
             for (int p = 0; p < P; p++) {
                 for (int f = 0; f < F; f++) {
@@ -230,13 +181,25 @@ public class ManufacturingProblem {
 
             // Optimize model
             model.optimize();
-
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
                     for (int f = 0; f < F; f++) {
-                        System.out.print((int) quantityManufacturedPLF[p][l][f].get(GRB.DoubleAttr.X) + " ");
+                        double value = quantityManufacturedPLF[p][l][f].get(GRB.DoubleAttr.X);
+                        if (value > 0) {
+                            System.out.print(quantityManufacturedPLF[p][l][f].get(GRB.StringAttr.VarName) + ": " + (int) value + " ");
+                        }
                     }
-                    System.out.println();
+                }
+            }
+
+            for (int p = 0; p < P; p++) {
+                for (int f = 0; f < F; f++) {
+                    for (int j = 0; j < J; j++) {
+                        double value = quantityTransportedPFJ[p][f][j].get(GRB.DoubleAttr.X);
+                        if (value > 0) {
+                            System.out.print(quantityTransportedPFJ[p][f][j].get(GRB.StringAttr.VarName) + ": " + (int) value + " ");
+                        }
+                    }
                 }
             }
 
