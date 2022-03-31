@@ -18,6 +18,10 @@ public class ManufacturingProblem {
             System.out.println("Products: " + P);
             System.out.println("\n\n");
 
+            int totalDemand = 0;
+            int totalVariables = 0;
+            int totalRestrictions = 0;
+
             // Create variables and constraints
 
             // D(j,p)
@@ -25,6 +29,7 @@ public class ManufacturingProblem {
             for (int j = 0; j < J; j++) {
                 for (int p = 0; p < P; p++) {
                     int demand = getRandomNumber(10, 20);
+                    totalDemand += demand;
                     demandJP[j][p] = demand;
                 }
             }
@@ -85,6 +90,7 @@ public class ManufacturingProblem {
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
                     for (int f = 0; f < F; f++) {
+                        totalVariables++;
                         quantityManufacturedPLF[p][l][f] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "Q[" + p + "][" + l + "][" + f + "]");
                     }
                 }
@@ -95,6 +101,7 @@ public class ManufacturingProblem {
             for (int p = 0; p < P; p++) {
                 for (int f = 0; f < F; f++) {
                     for (int j = 0; j < J; j++) {
+                        totalVariables++;
                         quantityTransportedPFJ[p][f][j] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "W[" + p + "][" + f + "][" + j + "]");
                     }
                 }
@@ -132,6 +139,7 @@ public class ManufacturingProblem {
                     for (int f = 0; f < F; f++) {
                         expr.addTerm(1.0, quantityTransportedPFJ[p][f][j]);
                     }
+                    totalRestrictions++;
                     model.addConstr(expr, GRB.EQUAL, demandJP[j][p], "D[" + j + "][" + p + "]");
                 }
             }
@@ -145,6 +153,7 @@ public class ManufacturingProblem {
                             expr.addTerm(rawMaterialMPL[m][p][l], quantityManufacturedPLF[p][l][f]);
                         }
                     }
+                    totalRestrictions++;
                     model.addConstr(expr, GRB.LESS_EQUAL, rawMaterialAvailableMF[m][f], "R[" + m + "][" + f + "]");
                 }
             }
@@ -156,6 +165,7 @@ public class ManufacturingProblem {
                     for (int p = 0; p < P; p++) {
                         expr.addTerm(1.0, quantityManufacturedPLF[p][l][f]);
                     }
+                    totalRestrictions++;
                     model.addConstr(expr, GRB.LESS_EQUAL, capacityLF[l][f], "C[" + l + "][" + f + "]");
                 }
             }
@@ -171,6 +181,7 @@ public class ManufacturingProblem {
                         expr.addTerm(-1.0, quantityTransportedPFJ[p][f][j]);
                     }
 
+                    totalRestrictions++;
                     model.addConstr(expr, GRB.EQUAL, 0.0, "Q[" + p + "][" + f + "]=W[" + p + "][" + f + "]");
                 }
             }
@@ -178,11 +189,14 @@ public class ManufacturingProblem {
             // Optimize model
             model.optimize();
 
+            int manufactured = 0;
+            int transported = 0;
             System.out.println("RESULTS\n");
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
                     for (int f = 0; f < F; f++) {
                         double value = quantityManufacturedPLF[p][l][f].get(GRB.DoubleAttr.X);
+                        manufactured += value;
                         if (value > 0) {
                             System.out.print(quantityManufacturedPLF[p][l][f].get(GRB.StringAttr.VarName) + ": " + (int) value + " ");
                         }
@@ -195,13 +209,17 @@ public class ManufacturingProblem {
                 for (int f = 0; f < F; f++) {
                     for (int j = 0; j < J; j++) {
                         double value = quantityTransportedPFJ[p][f][j].get(GRB.DoubleAttr.X);
+                        transported += value;
                         if (value > 0) {
                             System.out.print(quantityTransportedPFJ[p][f][j].get(GRB.StringAttr.VarName) + ": " + (int) value + " ");
                         }
                     }
                 }
             }
-            System.out.println("-----------------------------------------------------------------\n\n");
+            System.out.println("\n-----------------------------------------------------------------\n\n");
+            System.out.println("Total demand: " + totalDemand + " - Total manufactured: " + manufactured + " - Total transported: " + transported);
+            System.out.println("Total variables: " + totalVariables + " - Total restrictions: " + totalRestrictions);
+            System.out.println("\n-----------------------------------------------------------------");
 
             // Dispose of model and environment
             model.write("model.lp");
