@@ -7,9 +7,10 @@ inline int getRandomNumber(int l, int r) {
 	return rand() % r + l;
 }
 int main(int argc, char const *argv[]) {
-	vector<int> values(n) = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
+	vector<int> values(10) = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
 
 	for(int value: values) {
+		cout << "Case J =  " << value << endl;
 		try {
 			GRBEnv env = GRBEnv(true);
 			env.set("LogFile","manufacturing-problem.log");
@@ -92,7 +93,7 @@ int main(int argc, char const *argv[]) {
 	        for (int p = 0; p < P; p++) {
 	            for (int l = 0; l < L; l++) {
 	                for (int f = 0; f < F; f++) {
-	                    quantityManufacturedPLF[p][l][f] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "Q[" + p + "][" + l + "][" + f + "]");
+	                    quantityManufacturedPLF[p][l][f] = model.addVar(0.0, 1.0, 0.0, GRB_INTEGER, "Q[" + to_string(p) + "][" + to_string(l) + "][" + to_string(f) + "]");
 	                }
 	            }
 	        }
@@ -102,7 +103,7 @@ int main(int argc, char const *argv[]) {
 	        for (int p = 0; p < P; p++) {
 	            for (int f = 0; f < F; f++) {
 	                for (int j = 0; j < J; j++) {
-	                    quantityTransportedPFJ[p][f][j] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "W[" + p + "][" + f + "][" + j + "]");
+	                    quantityTransportedPFJ[p][f][j] = model.addVar(0.0, 1.0, 0.0, GRB_INTEGER, "W[" + to_string(p) + "][" + to_string(f) + "][" + to_string(j) + "]");
 	                }
 	            }
 	        }
@@ -139,7 +140,7 @@ int main(int argc, char const *argv[]) {
 	                for (int f = 0; f < F; f++) {
 	                    expr += quantityTransportedPFJ[p][f][j];
 	                }
-	                model.addConstr(expr, GRB.EQUAL, demandJP[j][p], "D[" + j + "][" + p + "]");
+	                model.addConstr(expr, GRB.EQUAL, demandJP[j][p], "D[" + to_string(j) + "][" + to_string(p) + "]");
 	            }
 	        }
 
@@ -152,7 +153,7 @@ int main(int argc, char const *argv[]) {
 	                        expr += rawMaterialMPL[m][p][l] * quantityManufacturedPLF[p][l][f];
 	                    }
 	                }
-	                model.addConstr(expr, GRB.LESS_EQUAL, rawMaterialAvailableMF[m][f], "R[" + m + "][" + f + "]");
+	                model.addConstr(expr, GRB.LESS_EQUAL, rawMaterialAvailableMF[m][f], "R[" + to_string(m) + "][" + to_string(f) + "]");
 	            }
 	        }
 
@@ -163,29 +164,30 @@ int main(int argc, char const *argv[]) {
 	                for (int p = 0; p < P; p++) {
 	                    expr += quantityManufacturedPLF[p][l][f];
 	                }
-	                model.addConstr(expr, GRB.LESS_EQUAL, capacityLF[l][f], "C[" + l + "][" + f + "]");
+	                model.addConstr(expr, GRB.LESS_EQUAL, capacityLF[l][f], "C[" + to_string(l) + "][" + to_string(f) + "]");
 	            }
 	        }
 
-	        // Q(p,l,f), W(p,f,j) ≥ 0
+	        // ∑Q(p,l,f) = ∑W(p,f,j) ∀p∀f
+	        GRBLinExpr exprA = 0.0
 	        for (int p = 0; p < P; p++) {
 	            for (int l = 0; l < L; l++) {
 	                for (int f = 0; f < F; f++) {
-	                    expr = 0.0;
-	                    expr += quantityManufacturedPLF[p][l][f];
-	                    model.addConstr(expr, GRB.GREATER_EQUAL, 0.0, "Q[" + p + "][" + l + "][" + f + "]");
+	                    exprA += quantityManufacturedPLF[p][l][f];
 	                }
 	            }
 	        }
+
+	        GRBLinExpr exprB = 0.0
 	        for (int p = 0; p < P; p++) {
 	            for (int f = 0; f < F; f++) {
 	                for (int j = 0; j < J; j++) {
-	                    expr = 0.0;
-	                    expr += quantityTransportedPFJ[p][f][j];
-	                    model.addConstr(expr, GRB.GREATER_EQUAL, 0.0, "W[" + p + "][" + f + "][" + j + "]");
+	                    exprB += quantityTransportedPFJ[p][f][j];
 	                }
 	            }
 	        }
+	        model.addConstr(exprA, GRB.EQUAL, exprB, "Q(p,l,f) = W(p,l,j)");
+
 
 	        // Optimize model
 	        model.optimize();
@@ -215,6 +217,7 @@ int main(int argc, char const *argv[]) {
 	        model.write("model.lp");
 	        model.dispose();
 	        env.dispose();
+	        cout << endl;
 		} catch (GRBException e) {
 	        System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
 	    }
