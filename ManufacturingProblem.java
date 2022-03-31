@@ -160,28 +160,25 @@ public class ManufacturingProblem {
                 }
             }
 
-            // Q(p,l,f), W(p,f,j) ≥ 0
-            for (int p = 0; p < P; p++) {
-                for (int l = 0; l < L; l++) {
-                    for (int f = 0; f < F; f++) {
-                        expr = new GRBLinExpr();
-                        expr.addTerm(1.0, quantityManufacturedPLF[p][l][f]);
-                        model.addConstr(expr, GRB.GREATER_EQUAL, 0.0, "Q[" + p + "][" + l + "][" + f + "]");
-                    }
-                }
-            }
+            // (l∈f)∑Q(p,l,f) = (j∈J)∑W(p,f,j) ∀p∀f
             for (int p = 0; p < P; p++) {
                 for (int f = 0; f < F; f++) {
-                    for (int j = 0; j < J; j++) {
-                        expr = new GRBLinExpr();
-                        expr.addTerm(1.0, quantityTransportedPFJ[p][f][j]);
-                        model.addConstr(expr, GRB.GREATER_EQUAL, 0.0, "W[" + p + "][" + f + "][" + j + "]");
+                    expr = new GRBLinExpr();
+                    for (int l = 0; l < L; l++) {
+                        expr.addTerm(1.0, quantityManufacturedPLF[p][l][f]);
                     }
+                    for (int j = 0; j < J; j++) {
+                        expr.addTerm(-1.0, quantityTransportedPFJ[p][f][j]);
+                    }
+
+                    model.addConstr(expr, GRB.EQUAL, 0.0, "Q[" + p + "][" + f + "]=W[" + p + "][" + f + "]");
                 }
             }
 
             // Optimize model
             model.optimize();
+
+            System.out.println("RESULTS\n");
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
                     for (int f = 0; f < F; f++) {
@@ -192,6 +189,7 @@ public class ManufacturingProblem {
                     }
                 }
             }
+            System.out.println("\n\n-----------------------------------------------------------------\n");
 
             for (int p = 0; p < P; p++) {
                 for (int f = 0; f < F; f++) {
@@ -203,6 +201,7 @@ public class ManufacturingProblem {
                     }
                 }
             }
+            System.out.println("-----------------------------------------------------------------\n\n");
 
             // Dispose of model and environment
             model.write("model.lp");
