@@ -13,6 +13,7 @@ int main(int argc, char const *argv[]) {
 		cout << "Case J =  " << value << endl;
 		try {
 			GRBEnv env = GRBEnv(true);
+			env.start();
 			env.set("LogFile","manufacturing-problem.log");
 			GRBModel model = GRBModel(env);
 			int J = value;
