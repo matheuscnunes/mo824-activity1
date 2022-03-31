@@ -6,7 +6,7 @@ public class ManufacturingProblem {
         try {
             GRBEnv env = new GRBEnv("manufacturing-problem.log");
             GRBModel model = new GRBModel(env);
-            int J = 1000;
+            int J = 100;
             int F = getRandomNumber(J, 2 * J); // Factories number
             int L = getRandomNumber(5, 10); // Machines number
             int M = getRandomNumber(5, 10); // Raw materials number
