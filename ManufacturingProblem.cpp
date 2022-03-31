@@ -219,7 +219,7 @@ int main(int argc, char const *argv[]) {
 	        env.dispose();
 	        cout << endl;
 		} catch (GRBException e) {
-	        System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
+	        cout << "Error code: " << e.getErrorCode() << ". " << e.getMessage();
 	    }
 	}
 	return 0;
