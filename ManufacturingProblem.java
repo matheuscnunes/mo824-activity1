@@ -16,6 +16,7 @@ public class ManufacturingProblem {
             System.out.println("Machines: " + L);
             System.out.println("Raw materials: " + M);
             System.out.println("Products: " + P);
+            System.out.println("\n\n");
 
             // Create variables and constraints
 
@@ -84,7 +85,7 @@ public class ManufacturingProblem {
             for (int p = 0; p < P; p++) {
                 for (int l = 0; l < L; l++) {
                     for (int f = 0; f < F; f++) {
-                        quantityManufacturedPLF[p][l][f] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "Q[" + p + "][" + l + "][" + f + "]");
+                        quantityManufacturedPLF[p][l][f] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "Q[" + p + "][" + l + "][" + f + "]");
                     }
                 }
             }
@@ -94,7 +95,7 @@ public class ManufacturingProblem {
             for (int p = 0; p < P; p++) {
                 for (int f = 0; f < F; f++) {
                     for (int j = 0; j < J; j++) {
-                        quantityTransportedPFJ[p][f][j] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "W[" + p + "][" + f + "][" + j + "]");
+                        quantityTransportedPFJ[p][f][j] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "W[" + p + "][" + f + "][" + j + "]");
                     }
                 }
             }
