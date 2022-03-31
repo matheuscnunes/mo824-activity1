@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "/Library/gurobi951/macos_universal2/gurobi_c++.h"
+#include "/home/matheus.nunes/Softwares/gurobi9.5.1_linux64/gurobi951/linux64/include/gurobi_c++.h"
 
 using namespace std;
 
@@ -7,7 +7,7 @@ inline int getRandomNumber(int l, int r) {
 	return rand() % r + l;
 }
 int main(int argc, char const *argv[]) {
-	vector<int> values(10) = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
+	vector<int> values{100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
 
 	for(int value: values) {
 		cout << "Case J =  " << value << endl;
@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
 	        for(int j = 0; j < J; j++) {
 	        	for(int p = 0; p < P; p++) {
 	        		int demand = getRandomNumber(5, 10);
-	        		demandJP[j][p] = demand
+	        		demandJP[j][p] = demand;
 	        	}
 	        }
 
@@ -100,7 +100,7 @@ int main(int argc, char const *argv[]) {
 	        }
 
 	        // W(p,f,j) Variable
-	        GRB VarquantityTransportedPFJ[P][F][J];
+	        GRBVar quantityTransportedPFJ[P][F][J];
 	        for (int p = 0; p < P; p++) {
 	            for (int f = 0; f < F; f++) {
 	                for (int j = 0; j < J; j++) {
@@ -130,7 +130,7 @@ int main(int argc, char const *argv[]) {
 	                }
 	            }
 	        }
-	        model.setObjective(expr, GRB.MINIMIZE);
+	        model.setObjective(expr, GRB_MINIMIZE);
 
 	        // Restrictions
 
@@ -141,7 +141,7 @@ int main(int argc, char const *argv[]) {
 	                for (int f = 0; f < F; f++) {
 	                    expr += quantityTransportedPFJ[p][f][j];
 	                }
-	                model.addConstr(expr, GRB.EQUAL, demandJP[j][p], "D[" + to_string(j) + "][" + to_string(p) + "]");
+	                model.addConstr(expr, GRB_EQUAL, demandJP[j][p], "D[" + to_string(j) + "][" + to_string(p) + "]");
 	            }
 	        }
 
@@ -154,7 +154,7 @@ int main(int argc, char const *argv[]) {
 	                        expr += rawMaterialMPL[m][p][l] * quantityManufacturedPLF[p][l][f];
 	                    }
 	                }
-	                model.addConstr(expr, GRB.LESS_EQUAL, rawMaterialAvailableMF[m][f], "R[" + to_string(m) + "][" + to_string(f) + "]");
+	                model.addConstr(expr, GRB_LESS_EQUAL, rawMaterialAvailableMF[m][f], "R[" + to_string(m) + "][" + to_string(f) + "]");
 	            }
 	        }
 
@@ -165,12 +165,12 @@ int main(int argc, char const *argv[]) {
 	                for (int p = 0; p < P; p++) {
 	                    expr += quantityManufacturedPLF[p][l][f];
 	                }
-	                model.addConstr(expr, GRB.LESS_EQUAL, capacityLF[l][f], "C[" + to_string(l) + "][" + to_string(f) + "]");
+	                model.addConstr(expr, GRB_LESS_EQUAL, capacityLF[l][f], "C[" + to_string(l) + "][" + to_string(f) + "]");
 	            }
 	        }
 
 	        // ∑Q(p,l,f) = ∑W(p,f,j) ∀p∀f
-	        GRBLinExpr exprA = 0.0
+	        GRBLinExpr exprA = 0.0;
 	        for (int p = 0; p < P; p++) {
 	            for (int l = 0; l < L; l++) {
 	                for (int f = 0; f < F; f++) {
@@ -179,7 +179,7 @@ int main(int argc, char const *argv[]) {
 	            }
 	        }
 
-	        GRBLinExpr exprB = 0.0
+	        GRBLinExpr exprB = 0.0;
 	        for (int p = 0; p < P; p++) {
 	            for (int f = 0; f < F; f++) {
 	                for (int j = 0; j < J; j++) {
@@ -187,7 +187,7 @@ int main(int argc, char const *argv[]) {
 	                }
 	            }
 	        }
-	        model.addConstr(exprA, GRB.EQUAL, exprB, "Q(p,l,f) = W(p,l,j)");
+	        model.addConstr(exprA, GRB_EQUAL, exprB, "Q(p,l,f) = W(p,l,j)");
 
 
 	        // Optimize model
@@ -195,9 +195,9 @@ int main(int argc, char const *argv[]) {
 	        for (int p = 0; p < P; p++) {
 	            for (int l = 0; l < L; l++) {
 	                for (int f = 0; f < F; f++) {
-	                    double value = quantityManufacturedPLF[p][l][f].get(GRB.DoubleAttr.X);
+	                    double value = quantityManufacturedPLF[p][l][f].get(GRB_DoubleAttr_X);
 	                    if (value > 0) {
-	                        cout << quantityManufacturedPLF[p][l][f].get(GRB.StringAttr.VarName) << ": " << (int)value << " ";
+	                        cout << quantityManufacturedPLF[p][l][f].get(GRB_StringAttr_VarName) << ": " << (int)value << " ";
 	                    }
 	                }
 	            }
@@ -206,9 +206,9 @@ int main(int argc, char const *argv[]) {
 	        for (int p = 0; p < P; p++) {
 	            for (int f = 0; f < F; f++) {
 	                for (int j = 0; j < J; j++) {
-	                    double value = quantityTransportedPFJ[p][f][j].get(GRB.DoubleAttr.X);
+	                    double value = quantityTransportedPFJ[p][f][j].get(GRB_DoubleAttr_X);
 	                    if (value > 0) {
-	                        cout << quantityTransportedPFJ[p][f][j].get(GRB.StringAttr.VarName) << ": " << (int) value << " ";
+	                        cout << quantityTransportedPFJ[p][f][j].get(GRB_StringAttr_VarName) << ": " << (int) value << " ";
 	                    }
 	                }
 	            }
@@ -216,8 +216,6 @@ int main(int argc, char const *argv[]) {
 
 	        // Dispose of model and environment
 	        model.write("model.lp");
-	        model.dispose();
-	        env.dispose();
 	        cout << endl;
 		} catch (GRBException e) {
 	        cout << "Error code: " << e.getErrorCode() << ". " << e.getMessage();
